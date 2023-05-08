@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 import time
+import os
 
 #월, 일, 팀플실 입력
 def set_date(mon, day, num): 
@@ -62,19 +63,37 @@ driver.find_element(By.XPATH,'//*[@id="top"]/div[2]/div/div[1]/a[5]').click()
 driver.find_element(By.XPATH,'//*[@id="sub05"]/div/a[4]').click()
 time.sleep(1)
 
+
 #아이디 비밀번호 입력 / 로그인
 done = 0
+autoT = 1 #자동입력되는 아이디가 틀릴 경우 0
 while not done:
-    id = input("ID : ")
-    pwd = input("PWD : ")
-    driver.find_element(By.XPATH,'//*[@id="txtUserID"]').send_keys(id)
-    driver.find_element(By.XPATH,'//*[@id="txtPwd"]').send_keys(pwd, Keys.ENTER)
+
+    if os.path.exists("id.txt") and autoT:#자동 로그인
+        f = open("id.txt",'r')
+        id = f.readline().strip()
+        pwd = f.readline().strip()
+        f.close()
+    else:#직접 로그인
+        id = input("ID : ")
+        pwd = input("PWD : ")
+
+    driver.find_element(By.XPATH,'//*[@id="txtUserID"]').send_keys(id)#id 입력
+    driver.find_element(By.XPATH,'//*[@id="txtPwd"]').send_keys(pwd,Keys.ENTER)#pwd 입력
     time.sleep(1)
+
     alert = driver.switch_to.alert
     al_msg = alert.text
     alert.accept()
-    if "환영합니다" in al_msg: done = 1
-    else: print("아이디 또는 비밀번호가 틀렸습니다.")
+    if "환영합니다" in al_msg: 
+        f = open("id.txt",'w')
+        f.write(f"{id}\n{pwd}")
+        f.close()  
+        done = 1
+    else: 
+        print("아이디 또는 비밀번호가 틀렸습니다.")
+        autoT = 0 #자동 로그인이었을 경우 다시 자동 로그인 방지
+
 
 #할 일 선택
 choice = 0
