@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 import time
 import os
+import chromedriver_autoinstaller
 
 #월, 일, 팀플실 입력
 def set_date(mon, day, num): 
@@ -56,9 +57,17 @@ def cancel(mon, day, num):
 
 
 #사이트 접속
-driver=webdriver.Chrome(executable_path="chromedriver")
+chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
+driver_path = f'./{chrome_ver}/chromedriver.exe'
+if not os.path.exists(driver_path):
+    chromedriver_autoinstaller.install()
+    
+options = webdriver.ChromeOptions()
+options.add_argument("headless")
+driver=webdriver.Chrome(driver_path, options=options)
 driver.set_window_size(1400,1000)
 driver.get("https://cse.cau.ac.kr/main.php")
+
 driver.find_element(By.XPATH,'//*[@id="top"]/div[2]/div/div[1]/a[5]').click()
 driver.find_element(By.XPATH,'//*[@id="sub05"]/div/a[4]').click()
 time.sleep(1)
@@ -139,4 +148,5 @@ while choice != 4:
             cancel(mon, day, num)
             
         case 4:
+            driver.quit()
             break
