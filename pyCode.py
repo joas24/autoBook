@@ -2,9 +2,26 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
+from datetime import datetime, timedelta
 import time
 import os
 import chromedriver_autoinstaller
+
+#날짜
+tdy = datetime.today()
+tmr = tdy + timedelta(days=1)
+
+#오늘 / 내일
+def date_input():
+    date_choice = int(input(f"\n-날짜 선택-\n1. 오늘({tdy.date()})  2. 내일({tmr.date()})\n"))
+    match date_choice:
+        case 1:
+            mon = tdy.month
+            day = tdy.day
+        case 2:
+            mon = tmr.month
+            day = tmr.day
+    return mon, day
 
 #월, 일, 팀플실 입력
 def set_date(mon, day, num): 
@@ -57,14 +74,12 @@ def cancel(mon, day, num):
 
 
 #사이트 접속
-chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
-driver_path = f'./{chrome_ver}/chromedriver.exe'
-if not os.path.exists(driver_path):
-    chromedriver_autoinstaller.install()
+
+chromedriver_autoinstaller.install()
     
 options = webdriver.ChromeOptions()
 options.add_argument("headless")
-driver=webdriver.Chrome(driver_path, options=options)
+driver=webdriver.Chrome(options=options)
 driver.set_window_size(1400,1000)
 driver.get("https://cse.cau.ac.kr/main.php")
 
@@ -84,7 +99,7 @@ while not done:
         pwd = f.readline().strip()
         f.close()
     else:#직접 로그인
-        id = input("ID : ")
+        id = input("\n\nID : ")
         pwd = input("PWD : ")
 
     driver.find_element(By.XPATH,'//*[@id="txtUserID"]').send_keys(id)#id 입력
@@ -104,30 +119,31 @@ while not done:
         autoT = 0 #자동 로그인이었을 경우 다시 자동 로그인 방지
 
 
+
 #할 일 선택
 choice = 0
 while choice != 4:
-    choice = int(input("1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n"))
+    choice = int(input("\n1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n"))
 
     match choice:
 
         case 1:
-            mon = input("mon : ")
-            day = input("day : ")
-            num = int(input("num : "))
+            mon, day = date_input()
+            num = int(input("팀플실(1~6) : "))
             see_one(mon,day,num)
 
         case 2:
-            date_custum = int(input("- 날짜, 팀플실 -\n1. 최근 조회한대로\n2. 직접 입력\n"))
+            date_custum = int(input(f"\n- 날짜, 팀플실 -\n1. 최근 조회한대로({mon}/{day} 팀플실 {num})\n2. 직접 입력\n"))
+
             if date_custum == 2:
-                mon = input("mon : ")
-                day = input("day : ")
-                num = int(input("num : "))
+                mon, day = date_input() 
+                num = int(input("팀플실(1~6) : "))
             
             startH = int(input("start hour : "))
             startM = int(input("start minute(1. 정각 2. 30분) : "))-1
 
             info_custum = int(input("- 시간, 인원, 목적 -\n1. 2시간 / 2명 / 스터디\n2. 직접 입력\n"))
+
             if info_custum == 2:
                 t = int(input("- 이용 시간 - \n1. 30분\n2. 1시간\n3. 1시간 30분\n4. 2시간\n"))
                 people = int(input("인원수 : "))
@@ -140,11 +156,10 @@ while choice != 4:
             else: print("정해진 숫자를 입력해주세요.")
 
         case 3:
-            date_custum = int(input("- 날짜, 팀플실 -\n1. 최근 조회한대로\n2. 직접 입력\n"))
+            date_custum = int(input("\n- 날짜, 팀플실 -\n1. 최근 조회한대로({mon}/{day} 팀플실 {num})\n2. 직접 입력\n"))
             if date_custum == 2:
-                mon = input("mon : ")
-                day = input("day : ")
-                num = int(input("num : "))
+                mon, day = date_input()
+                num = int(input("팀플실(1~6) : "))
             cancel(mon, day, num)
             
         case 4:
