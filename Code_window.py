@@ -13,7 +13,7 @@ tmr = tdy + timedelta(days=1)
 
 #오늘 / 내일
 def date_input():
-    date_choice = int(input(f"\n-날짜 선택-\n1. 오늘 ({tdy.month}/{tdy.day})  2. 내일 ({tmr.month}/{tmr.day})\n"))
+    date_choice = int(input(f"\n-날짜 선택-\n1. 오늘 ({tdy.month}/{tdy.day})  2. 내일 ({tmr.month}/{tmr.day})\n>>"))
     match date_choice:
         case 1:
             mon = tdy.month
@@ -33,6 +33,7 @@ def set_date(mon, day, num):
 def see_one(mon, day, num):
     set_date(mon, day, num)
     list_tbody = driver.find_element(By.XPATH, '//*[@id="content"]/table/tbody')
+    clear()
     for tr in list_tbody.find_elements(By.TAG_NAME, 'tr'):
         print(tr.get_attribute("innerText"))
     
@@ -94,7 +95,7 @@ clear()
 #아이디 비밀번호 입력 / 로그인
 done = 0
 autoT = 1 #자동입력되는 아이디가 틀릴 경우 0
-print("\n6피 팀플실 예약 프로그램")
+print("\n6층 팀플실 예약 프로그램")
 while not done:
 
     if os.path.exists("id.txt") and autoT:#자동 로그인
@@ -129,7 +130,7 @@ choice = 0
 mon, day, num = 0,0,0
 while choice != 4:
 
-    choice = int(input("\n1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n"))
+    choice = int(input("\n1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n>>"))
 
     match choice:
 
@@ -139,7 +140,7 @@ while choice != 4:
             see_one(mon,day,num)
 
         case 2:
-            date_custum = int(input(f"\n- 날짜, 팀플실 -\n1. 최근 조회한대로({mon}/{day} 팀플실 {num})\n2. 직접 입력\n"))
+            date_custum = int(input(f"\n- 날짜, 팀플실 -\n1. 최근 조회한대로({mon}/{day} 팀플실 {num})\n2. 직접 입력\n>>"))
 
             if date_custum == 2:
                 mon, day = date_input() 
@@ -148,10 +149,10 @@ while choice != 4:
             startH = int(input("\nstart hour : "))
             startM = int(input("start minute(1. 정각 2. 30분) : "))-1
 
-            info_custum = int(input("\n- 시간, 인원, 목적 -\n1. 2시간 / 2명 / 스터디\n2. 직접 입력\n"))
+            info_custum = int(input("\n- 시간, 인원, 목적 -\n1. 2시간 / 2명 / 스터디\n2. 직접 입력\n>>"))
 
             if info_custum == 2:
-                t = int(input("\n- 이용 시간 - \n1. 30분\n2. 1시간\n3. 1시간 30분\n4. 2시간\n"))
+                t = int(input("\n- 이용 시간 - \n1. 30분\n2. 1시간\n3. 1시간 30분\n4. 2시간\n>>"))
                 people = int(input("\n인원수 : "))
                 msg = input("이용 목적 : ")
                 book(mon, day, num, startH, startM, t, people, msg)
@@ -162,7 +163,7 @@ while choice != 4:
             else: print("정해진 숫자를 입력해주세요.")
 
         case 3:
-            date_custum = int(input(f"\n- 날짜, 팀플실 -\n1. 최근 조회한대로({mon}/{day} 팀플실 {num})\n2. 직접 입력\n"))
+            date_custum = int(input(f"\n- 날짜, 팀플실 -\n1. 최근 조회한대로({mon}/{day} 팀플실 {num})\n2. 직접 입력\n>>"))
             if date_custum == 2:
                 mon, day = date_input()
                 num = int(input("\n팀플실(1~5) : "))
