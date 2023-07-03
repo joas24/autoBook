@@ -29,6 +29,39 @@ def set_date(mon, day, num):
     Select(driver.find_element(By.XPATH,'//*[@id="reserveDay"]')).select_by_value(str(day).zfill(2))
     Select(driver.find_element(By.XPATH,'//*[@id="classRoomNo"]')).select_by_index(num)
 
+#시간표 설정
+def set_timetable(mon, day):
+    driver.find_element(By.XPATH,'//*[@id="content"]/form/table[1]/tbody/tr/td/a').click() #달력으로 이동
+
+    time_table = [list(i for i in range(9,18)) for j in range(5)] #시간표 초기화
+    out = False
+
+    mon_n = int(driver.find_element(By.XPATH,'//*[@id="content"]/table[1]/tbody/tr/td[2]/font/b').get_attribute("innerText").split(".")[1]) #현재 월
+    if mon != mon_n: driver.find_element(By.XPATH,'//*[@id="content"]/table[1]/tbody/tr/td[3]/table/tbody/tr/td/a').click() #입력한 월과 현재 월이 다르다면 다음 달로 이동
+    
+    for i in range(2,8): #행
+        if out: break
+        for j in range(1,8): #열
+            a = driver.find_element(By.XPATH,f'//*[@id="content"]/table[3]/tbody/tr[{i}]/td[{j}]') #한 칸
+            if a.get_attribute("innerText")[0:2] == (str(day) if len(str(day)) == 2 else f"{day}\n"): #정해진 날짜와 일치한다면
+                lis = a.find_elements(By.TAG_NAME,'div')[2:]
+                for div in lis:
+                    txt = div.get_attribute("innerText")
+                    stt = int(txt[1:3]) #시작 시간
+                    end = int(txt[7:9]) #끝 시간
+                    end_m = int(txt[10]) #끝 분
+                    num_room = int(txt[20]) #팀프로젝트실
+                    for k in range(stt,(end+1 if end_m == 3 else end)):
+                        try:
+                            time_table[num_room-1].remove(k) #시간표에서 시간 삭제
+                        except: 
+                            continue
+                a.find_elements(By.TAG_NAME,'div')[1].click() #다시 예약 페이지로 이동
+                out = True
+                break
+
+    return time_table
+
 #조회하기
 def see_one(mon, day, num):
     set_date(mon, day, num)
@@ -53,6 +86,7 @@ def book(mon, day, num, startH, startM, t=4, people = 2, msg = "스터디"):
 
     driver.find_element(By.XPATH, '//*[@id="content"]/form/table[3]/tbody/tr/td/a/button').click()
     al = driver.switch_to.alert
+    clear()
     print(al.text)
     al.accept()
     table = driver.find_element(By.XPATH, '//*[@id="content"]/table/tbody')
@@ -75,14 +109,25 @@ def cancel(mon, day, num):
 #프롬프트 정리
 def clear():
     os.system('cls')
+    
+#맥 버전
+# def clear():
+#     os.system('clear')
 
 #사이트 접속
 
-chromedriver_autoinstaller.install()
-    
+chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]  #크롬드라이버 버전 확인
 options = webdriver.ChromeOptions()
 options.add_argument("headless")
-driver=webdriver.Chrome(options=options)
+
+try:
+    driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=options)   
+except:
+    chromedriver_autoinstaller.install(True)
+    driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=options) 
+
+driver.implicitly_wait(10)
+
 driver.set_window_size(1400,1000)
 driver.get("https://cse.cau.ac.kr/main.php")
 
@@ -131,13 +176,33 @@ mon, day, num = 0,0,0
 while choice != 4:
 
     choice = int(input("\n1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n>>"))
-
+    clear()
+    
     match choice:
 
         case 1:
             mon, day = date_input()
-            num = int(input("\n팀플실(1~5) : "))
-            see_one(mon,day,num)
+            table = set_timetable(mon, day)
+            choice_see = int(input("1. 전체 일정 보기\n2. 시간 지정\n3. 팀플실 지정\n"))
+            match choice_see:
+                case 1:
+                    clear()
+                    for i in range(5):
+                        print(f"팀프로젝트실 {i+1} : ", table[i])
+                    print("\n(9 -> 9시부터 10시까지 이용 가능함을 의미)")
+                
+                case 2:
+                    h = int(input("시작 시간 입력 : "))
+                    clear()
+                    print(f"{h}시부터 2시간 이용 가능한 팀플실")
+                    for i in range(5):
+                        if h in table[i] and h+1 in table[i]:
+                            print(i+1, end = " ")
+                    print("\n")
+
+                case 3:
+                    num = int(input("\n팀플실(1~5) : "))
+                    see_one(mon,day,num)
 
         case 2:
             date_custum = int(input(f"\n- 날짜, 팀플실 -\n1. 최근 조회한대로({mon}/{day} 팀플실 {num})\n2. 직접 입력\n>>"))
