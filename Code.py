@@ -115,18 +115,16 @@ def clear():
 #     os.system('clear')
 
 #사이트 접속
-
-chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]  #크롬드라이버 버전 확인
 options = webdriver.ChromeOptions()
 options.add_argument("headless")
+
+chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]  #크롬드라이버 버전 확인
 
 try:
     driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=options)   
 except:
     chromedriver_autoinstaller.install(True)
     driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=options) 
-
-driver.implicitly_wait(10)
 
 driver.set_window_size(1400,1000)
 driver.get("https://cse.cau.ac.kr/main.php")
@@ -144,10 +142,9 @@ print("\n6층 팀플실 예약 프로그램")
 while not done:
 
     if os.path.exists("id.txt") and autoT:#자동 로그인
-        f = open("id.txt",'r')
-        id = f.readline().strip()
-        pwd = f.readline().strip()
-        f.close()
+        with open("id.txt",'r') as f:
+            id = f.readline().strip()
+            pwd = f.readline().strip()
     else:#직접 로그인
         id = input("\nID : ")
         pwd = input("PWD : ")
@@ -175,15 +172,17 @@ choice = 0
 mon, day, num = 0,0,0
 while choice != 4:
 
-    choice = int(input("\n1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n>>"))
+    choice = int(input("1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n>>"))
     clear()
     
     match choice:
 
         case 1:
             mon, day = date_input()
+            clear()
+
             table = set_timetable(mon, day)
-            choice_see = int(input("1. 전체 일정 보기\n2. 시간 지정\n3. 팀플실 지정\n"))
+            choice_see = int(input("1. 전체 일정 조회\n2. 시간 지정 조회\n3. 팀플실 지정 조회\n"))
             match choice_see:
                 case 1:
                     clear()
@@ -211,8 +210,8 @@ while choice != 4:
                 mon, day = date_input() 
                 num = int(input("\n팀플실(1~5) : "))
             
-            startH = int(input("\nstart hour : "))
-            startM = int(input("start minute(1. 정각 2. 30분) : "))-1
+            startH = int(input("\n시작 시간 : "))
+            startM = int(input("1. 00분 2. 30분 : "))-1
 
             info_custum = int(input("\n- 시간, 인원, 목적 -\n1. 2시간 / 2명 / 스터디\n2. 직접 입력\n>>"))
 
