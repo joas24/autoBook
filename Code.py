@@ -13,7 +13,7 @@ tmr = tdy + timedelta(days=1)
 
 #오늘 / 내일
 def date_input():
-    date_choice = int(input(f"\n-날짜 선택-\n1. 오늘 ({tdy.month}/{tdy.day})  2. 내일 ({tmr.month}/{tmr.day})\n>>"))
+    date_choice = int(input(f"-날짜 선택-\n1. 오늘 ({tdy.month}/{tdy.day})  2. 내일 ({tmr.month}/{tmr.day})\n>>"))
     match date_choice:
         case 1:
             mon = tdy.month
@@ -127,7 +127,7 @@ except:
     driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=options) 
 
 driver.set_window_size(1400,1000)
-driver.get("https://cse.cau.ac.kr/main.php")
+driver.get("https://cse.cau.ac.kr/main.php")  #사이트 이동
 
 driver.find_element(By.XPATH,'//*[@id="top"]/div[2]/div/div[1]/a[5]').click()
 driver.find_element(By.XPATH,'//*[@id="sub05"]/div/a[4]').click()
@@ -137,20 +137,21 @@ clear()
 
 #아이디 비밀번호 입력 / 로그인
 done = 0
-autoT = 1 #자동입력되는 아이디가 틀릴 경우 0
+autoT = 1  #자동입력되는 아이디가 틀릴 경우 0
 print("\n6층 팀플실 예약 프로그램")
 while not done:
 
-    if os.path.exists("id.txt") and autoT:#자동 로그인
+    if os.path.exists("id.txt") and autoT:  #자동 로그인
         with open("id.txt",'r') as f:
             id = f.readline().strip()
             pwd = f.readline().strip()
-    else:#직접 로그인
+
+    else:  #직접 로그인
         id = input("\nID : ")
         pwd = input("PWD : ")
 
-    driver.find_element(By.XPATH,'//*[@id="txtUserID"]').send_keys(id)#id 입력
-    driver.find_element(By.XPATH,'//*[@id="txtPwd"]').send_keys(pwd,Keys.ENTER)#pwd 입력
+    driver.find_element(By.XPATH,'//*[@id="txtUserID"]').send_keys(id)  #id 입력
+    driver.find_element(By.XPATH,'//*[@id="txtPwd"]').send_keys(pwd,Keys.ENTER)  #pwd 입력
     time.sleep(1)
 
     alert = driver.switch_to.alert
@@ -161,17 +162,17 @@ while not done:
         f.write(f"{id}\n{pwd}")
         f.close()  
         done = 1
+
     else: 
         print("아이디 또는 비밀번호가 틀렸습니다.")
         autoT = 0 #자동 로그인이었을 경우 다시 자동 로그인 방지
-
 clear()
 
 #할 일 선택
 choice = 0
 mon, day, num = 0,0,0
-while choice != 4:
 
+while choice != 4:
     choice = int(input("1. 예약 상황 조회\n2. 예약하기\n3. 예약 취소하기\n4. 종료\n>>"))
     clear()
     
@@ -181,24 +182,32 @@ while choice != 4:
             mon, day = date_input()
             clear()
 
-            table = set_timetable(mon, day)
             choice_see = int(input("1. 전체 일정 조회\n2. 시간 지정 조회\n3. 팀플실 지정 조회\n"))
             match choice_see:
                 case 1:
+                    table = set_timetable(mon, day)
                     clear()
                     for i in range(5):
                         print(f"팀프로젝트실 {i+1} : ", table[i])
-                    print("\n(9 -> 9시부터 10시까지 이용 가능함을 의미)")
+                    print("\n9 -> 9시부터 10시까지 사용 가능함을 의미\n")
                 
                 case 2:
+                    table = set_timetable(mon, day)
                     h = int(input("시작 시간 입력 : "))
                     clear()
-                    print(f"{h}시부터 2시간 이용 가능한 팀플실")
+
+                    print(f"{h}시부터 1시간 사용 가능한 팀플실")
+                    for i in range(5):
+                        if h in table[i]:
+                            print(i+1, end = " ")
+                    print("\n")
+
+                    print(f"{h}시부터 2시간 사용 가능한 팀플실")
                     for i in range(5):
                         if h in table[i] and h+1 in table[i]:
                             print(i+1, end = " ")
                     print("\n")
-
+                    
                 case 3:
                     num = int(input("\n팀플실(1~5) : "))
                     see_one(mon,day,num)
